@@ -1,0 +1,30 @@
+{
+  "name": "AutoRateUTD",
+  "version": "1.0",
+  "description": "automatically get professor rating data without the hassle of tabs!",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage"
+  ],
+  "web_accessible_resources": [
+    "iframe.html",
+    "iframe.js"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "content.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ],
+  "manifest_version": 2
+}
