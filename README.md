@@ -13,3 +13,5 @@ to try it out for yourself
   
   upon seeing a proffessor name from UT dallas you will get a nice popup like this
   
+  ![Optional Text](./example.png)
+  
