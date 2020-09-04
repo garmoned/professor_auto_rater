@@ -11,7 +11,7 @@ to try it out for yourself
   go to chrome://extensions/ 
   select load unpacked and then direct chrome to where you cloned the repo
   
-  upon seeing a proffessor name from UT dallas you will get a nice popup like this
+  upon seeing a professor name from UT dallas you will get a nice popup like this
   
   ![Optional Text](./example.png)
   
