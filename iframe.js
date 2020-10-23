@@ -16,19 +16,26 @@ function renderRatingData(values) {
     return list;
 }
 
+var profData = [];
+
 init = (message) => {
 
-    console.log("recieved message modifying dom")
+    switch(message.type){
+        case "profName" : fetchProfData(message);
+        break;
+        case "cacheHit" : document.body.appendChild(renderRatingData(message.data));
+        break;
 
+    }
+}
 
+function fetchProfData(message){
+    
     chrome.runtime.onMessage.removeListener(init);
-
-    console.log(message.data, "message data")
-
     let nameData = {}
 
     let names = message.data.toLowerCase().split(" ");
-    console.log(names);
+
     if (names.length == 3) {
         nameData.FirstName = names[0]
         nameData.LastName = names[2]
@@ -38,7 +45,6 @@ init = (message) => {
 
     }
 
-    console.log("sending", nameData)
     fetch("https://gentle-shelf-92983.herokuapp.com/rateProf", {
         method: "POST",
         body: JSON.stringify(nameData),
@@ -49,11 +55,21 @@ init = (message) => {
         .then((res) => {
             res.json()
                 .then((data) => {
+
+                    profData = data.values;
                     document.body.appendChild(renderRatingData(data.values))
+
+                    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                        chrome.tabs.sendMessage(tabs[0].id, 
+                       {type:"profData", 
+                        name:message.data, 
+                        data:data.values})
+                    });
+
                 })
         })
-
 }
+
 
 chrome.runtime.onMessage.addListener(init)
 

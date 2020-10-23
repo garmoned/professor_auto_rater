@@ -1,4 +1,6 @@
 var profMap = new Map();
+var profCache = new Map();
+
 
 function scanNode(mutation) {
     for (node of mutation.addedNodes) {
@@ -36,8 +38,14 @@ function generateToolTip(professorName) {
     tooltip.style.visibility = "hidden"
 
     popup.onload = () => {
-        console.log("sending message")
-        chrome.runtime.sendMessage({ data: professorName })
+
+        if(profCache.get(professorName) === undefined){
+            chrome.runtime.sendMessage({ type: "profName", data: professorName })
+        }else{
+            chrome.runtime.sendMessage({ type: "cacheHit", data: profCache.get(professorName)})
+        }
+
+        
     }
 
 
@@ -67,7 +75,6 @@ function isProfessor(textContent) {
                                 ret += " "
                             }
                         }
-                        console.log(ret)
                         return ret
                     }
                 }
@@ -153,7 +160,7 @@ chrome.storage.local.get("profs", (profs) => {
             profMap.set(first.toLowerCase(), lastnames)
         }
     })
-    
+
 
     const observer = new MutationObserver(callback);
     observer.observe(targetNode, config);
@@ -161,3 +168,17 @@ chrome.storage.local.get("profs", (profs) => {
     scanRecur(document.body)
 })
 
+
+cacheProfessor = (profName,profData) => {
+
+    profCache.set(profName,profData);
+}
+
+
+chrome.runtime.onMessage.addListener(
+    (msg) => {
+    switch(msg.type){
+        case "profData" : cacheProfessor(msg.name,msg.data);
+        break;  
+    }
+})
