@@ -1,6 +1,7 @@
 var profMap = new Map();
 var profCache = new Map();
 
+var iframeCount = 0;
 
 function scanNode(mutation) {
     for (node of mutation.addedNodes) {
@@ -16,10 +17,11 @@ function generateToolTip(professorName) {
     popup.width = "200px";
     popup.height = "100px";
 
-    popup.id = "randomid";
     popup.style.zIndex = "1000 !important";
     popup.style.position = "relative"
 
+    popup.name = iframeCount;
+    iframeCount++;
 
     var path = chrome.runtime.getURL("iframe.html")
     popup.src = path;
@@ -37,15 +39,16 @@ function generateToolTip(professorName) {
     tooltip.style.zIndex = "1";
     tooltip.style.visibility = "hidden"
 
+ 
     popup.onload = () => {
 
-        if(profCache.get(professorName) === undefined){
-            chrome.runtime.sendMessage({ type: "profName", data: professorName })
-        }else{
-            chrome.runtime.sendMessage({ type: "cacheHit", data: profCache.get(professorName)})
-        }
-
         
+        if(profCache.get(professorName) === undefined){
+            chrome.runtime.sendMessage({ target:popup.name, type: "profName", data: professorName })
+        }else{
+            console.log("getting cached data")
+            chrome.runtime.sendMessage({ target:popup.name, type: "cacheHit", data: profCache.get(professorName)})
+        }
     }
 
 
@@ -178,7 +181,9 @@ cacheProfessor = (profName,profData) => {
 chrome.runtime.onMessage.addListener(
     (msg) => {
     switch(msg.type){
-        case "profData" : cacheProfessor(msg.name,msg.data);
+        case "profData" :
+            console.log("caching data " + msg.name)
+            cacheProfessor(msg.name,msg.data);
         break;  
     }
 })

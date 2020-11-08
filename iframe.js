@@ -8,10 +8,10 @@ function renderRatingData(values) {
             ele.textContent = val.name + " : " + val.content;
             list.appendChild(ele)
         })
-    }else{
+    } else {
         let ele = document.createElement("li")
-            ele.textContent = "data not found"
-            list.appendChild(ele)
+        ele.textContent = "data not found"
+        list.appendChild(ele)
     }
     return list;
 }
@@ -20,21 +20,27 @@ var profData = [];
 
 init = (message) => {
 
-    switch(message.type){
-        case "profName" : fetchProfData(message);
-        break;
-        case "cacheHit" : document.body.appendChild(renderRatingData(message.data));
-        break;
+    if (message.target === window.name) {
+        switch (message.type) {
+            case "profName": fetchProfData(message);
+                break;
+            case "cacheHit": document.body.appendChild(renderRatingData(message.data));
+                break;
 
+        }
     }
 }
 
-function fetchProfData(message){
-    
+
+function fetchProfData(message) {
+
     chrome.runtime.onMessage.removeListener(init);
+
     let nameData = {}
 
     let names = message.data.toLowerCase().split(" ");
+
+    foundProfessorName = message.data;
 
     if (names.length == 3) {
         nameData.FirstName = names[0]
@@ -59,11 +65,13 @@ function fetchProfData(message){
                     profData = data.values;
                     document.body.appendChild(renderRatingData(data.values))
 
-                    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                        chrome.tabs.sendMessage(tabs[0].id, 
-                       {type:"profData", 
-                        name:message.data, 
-                        data:data.values})
+                    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                        chrome.tabs.sendMessage(tabs[0].id,
+                            {
+                                type: "profData",
+                                name: message.data,
+                                data: data.values
+                            })
                     });
 
                 })
@@ -73,3 +81,6 @@ function fetchProfData(message){
 
 chrome.runtime.onMessage.addListener(init)
 
+window.addEventListener("message", (msg) => {
+    console.log("received message " + msg + data)
+})  
